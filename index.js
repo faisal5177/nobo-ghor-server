@@ -46,21 +46,21 @@ async function run() {
             res.send(result);
         });
 
-        // POST: Create a new booking
+        // POST Create a new booking
         app.post('/bookings', async (req, res) => {
             const bookingData = req.body;
             const result = await bookingsCollection.insertOne(bookingData);
             res.send(result);
         });
 
-        // GET: Fetch user-specific bookings
+        // GET Fetch user-specific bookings
         app.get('/bookings', async (req, res) => {
             const user_email = req.query.user_email;
             const result = await bookingsCollection.find({ user_email }).toArray();
             res.send(result);
         });
 
-        // DELETE: Remove a booking by ID (Fixed Version)
+        // DELETE Remove a booking by ID (Fixed Version)
         app.delete("/bookings/:id", async (req, res) => {
             const bookingId = req.params.id;
 

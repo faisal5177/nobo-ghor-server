@@ -7,7 +7,10 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true
+}));
 app.use(express.json());
 
 // MongoDB Connection
@@ -54,26 +57,23 @@ async function run() {
         });
 
         // GET Fetch user-specific bookings
-        app.get('/bookings', async (req, res) => {
-            const user_email = req.query.user_email;
-            const result = await bookingsCollection.find({ user_email }).toArray();
-            res.send(result);
-        });
+        app.get("/bookings", async (req, res) => {
+          const { user_email } = req.query;
+          const query = user_email ? { user_email } : {};
+          const bookings = await bookingsCollection.find(query).toArray();
+          res.json(bookings);
+      });
+      
 
-        // DELETE Remove a booking by ID (Fixed Version)
+        // DELETE Remove a booking by ID
         app.delete("/bookings/:id", async (req, res) => {
             const bookingId = req.params.id;
+            const result = await bookingsCollection.deleteOne({ _id: new ObjectId(bookingId) });
 
-            try {
-                const result = await bookingsCollection.deleteOne({ _id: new ObjectId(bookingId) });
-
-                if (result.deletedCount > 0) {
-                    res.json({ message: "Booking deleted successfully!", deletedCount: result.deletedCount });
-                } else {
-                    res.status(404).json({ message: "Booking not found" });
-                }
-            } catch (err) {
-                res.status(500).json({ message: "Error deleting booking", error: err });
+            if (result.deletedCount > 0) {
+                res.json({ message: "Booking deleted successfully!", deletedCount: result.deletedCount });
+            } else {
+                res.status(404).json({ message: "Booking not found" });
             }
         });
   
